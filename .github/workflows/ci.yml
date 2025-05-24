@@ -5,9 +5,37 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: frontend-ci-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true   # keep only the latest run per branch/PR
+
 jobs:
   build:
-    uses: notivest/.github/.github/workflows/base-ci.yml@main
-    with:
-      run_tests: pnpm run test
-      build_cmd: pnpm run build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20 and pnpm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install pnpm CLI
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile # Only install if lockfile is up-to-date, to have a reproducible build
+
+      - name: Run ESLint
+        run: pnpm run lint
+
+      - name: Run unit tests (Vitest)
+        run: pnpm run test -- --run
+
+      - name: Build production bundle (Vite)
+        run: pnpm run build      # outputs dist/
