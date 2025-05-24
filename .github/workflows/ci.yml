@@ -1,0 +1,13 @@
+name: frontend-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    uses: notivest/.github/.github/workflows/base-ci.yml@main
+    with:
+      run_tests: pnpm run test
+      build_cmd: pnpm run build
