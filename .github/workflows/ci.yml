@@ -27,6 +27,10 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 9
+          run_install: false
+
+      - name: Confirm pnpm is available
+        run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile # Only install if lockfile is up-to-date, to have a reproducible build
